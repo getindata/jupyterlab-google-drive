@@ -2,9 +2,8 @@ name: Build
 
 on:
   push:
-    branches: main
-  pull_request:
-    branches: '*'
+    tags:
+    - '*'
 
 jobs:
   build:
@@ -40,6 +39,11 @@ jobs:
       with:
         name: myextension-sdist
         path: myextension.tar.gz
+
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "dist/*.tar.gz"
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   test_isolated:
     needs: build
