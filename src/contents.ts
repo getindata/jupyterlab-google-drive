@@ -156,7 +156,7 @@ export class GoogleDrive implements Contents.IDrive {
 
     let model: Partial<Contents.IModel>;
     if (contentType === 'notebook') {
-      fileType = DocumentRegistry.defaultNotebookFileType;
+      fileType = DocumentRegistry.getDefaultNotebookFileType();
       ext = ext || fileType.extensions[0];
       baseName = 'Untitled';
       const modelFactory = this._docRegistry.getModelFactory('Notebook');
@@ -167,26 +167,26 @@ export class GoogleDrive implements Contents.IDrive {
         type: fileType.contentType,
         content: modelFactory.createNew().toJSON(),
         mimetype: fileType.mimeTypes[0],
-        format: fileType.fileFormat
+        format: fileType.fileFormat,
       };
     } else if (contentType === 'file') {
-      fileType = DocumentRegistry.defaultTextFileType;
+      fileType = DocumentRegistry.getDefaultTextFileType();
       ext = ext || fileType.extensions[0];
       baseName = 'untitled';
       model = {
         type: fileType.contentType,
         content: '',
         mimetype: fileType.mimeTypes[0],
-        format: fileType.fileFormat
+        format: fileType.fileFormat,
       };
     } else if (contentType === 'directory') {
-      fileType = DocumentRegistry.defaultDirectoryFileType;
+      fileType = DocumentRegistry.getDefaultDirectoryFileType();
       ext = ext || '';
       baseName = 'Untitled Folder';
       model = {
         type: fileType.contentType,
         content: [],
-        format: fileType.fileFormat
+        format: fileType.fileFormat,
       };
     } else {
       throw new Error('Unrecognized type ' + contentType);
@@ -210,7 +210,7 @@ export class GoogleDrive implements Contents.IDrive {
     this._fileChanged.emit({
       type: 'new',
       oldValue: null,
-      newValue: contents
+      newValue: contents,
     });
     return contents;
   }
@@ -227,7 +227,7 @@ export class GoogleDrive implements Contents.IDrive {
     this._fileChanged.emit({
       type: 'delete',
       oldValue: { path },
-      newValue: null
+      newValue: null,
     });
   }
 
@@ -254,7 +254,7 @@ export class GoogleDrive implements Contents.IDrive {
     this._fileChanged.emit({
       type: 'rename',
       oldValue: { path },
-      newValue: contents
+      newValue: contents,
     });
     return contents;
   }
@@ -275,7 +275,7 @@ export class GoogleDrive implements Contents.IDrive {
   ): Promise<Contents.IModel> {
     const fileType = this._fileTypeForContentsModel(options);
     const contents = await this.get(path).then(
-      contents => {
+      (contents) => {
         // The file exists.
         if (options) {
           // Overwrite the existing file.
@@ -311,7 +311,7 @@ export class GoogleDrive implements Contents.IDrive {
     this._fileChanged.emit({
       type: 'save',
       oldValue: null,
-      newValue: contents
+      newValue: contents,
     });
     return contents;
   }
@@ -345,7 +345,7 @@ export class GoogleDrive implements Contents.IDrive {
     this._fileChanged.emit({
       type: 'new',
       oldValue: null,
-      newValue: contents
+      newValue: contents,
     });
     return contents;
   }
