@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "@jupyterlab/google-drive",
+  "description": "@jupyterlab/google-drive settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

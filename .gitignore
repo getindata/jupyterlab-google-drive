@@ -3,3 +3,7 @@ lib/
 test/build/*
 node_modules/
 npm-debug.log
+_temp_extension/
+jupyterlab_google_drive.egg-info/
+jupyterlab_google_drive/labextension/
+dist/

@@ -20,7 +20,7 @@ import {
   initializeGapi,
   signIn,
   signOut,
-  getCurrentUserProfile
+  getCurrentUserProfile,
 } from './gapi';
 
 /**
@@ -77,20 +77,12 @@ export class GoogleDriveFileBrowser extends Widget {
   }
 
   /**
-   * Whether the widget has been disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
-  /**
    * Dispose of the resource held by the widget.
    */
   dispose(): void {
     if (this.isDisposed) {
       return;
     }
-    this._isDisposed = true;
     this._loginScreen.dispose();
     this._browser.dispose();
     super.dispose();
@@ -99,7 +91,7 @@ export class GoogleDriveFileBrowser extends Widget {
   private _createBrowser(): void {
     // Create the file browser
     this._browser = this._factory.createFileBrowser(NAMESPACE, {
-      driveName: this._driveName
+      driveName: this._driveName,
     });
 
     // Create the logout button.
@@ -109,7 +101,7 @@ export class GoogleDriveFileBrowser extends Widget {
         this._onLogoutClicked();
       },
       tooltip: `Sign Out (${userProfile.getEmail()})`,
-      iconClass: 'jp-GoogleUserBadge jp-Icon jp-Icon-16'
+      iconClass: 'jp-GoogleUserBadge jp-Icon jp-Icon-16',
     });
 
     this._browser.toolbar.addItem('logout', this._logoutButton);
@@ -122,7 +114,7 @@ export class GoogleDriveFileBrowser extends Widget {
       showDialog({
         title: 'Sign Out',
         body: 'Please close all documents in Google Drive before signing out',
-        buttons: [Dialog.okButton({ label: 'OK' })]
+        buttons: [Dialog.okButton({ label: 'OK' })],
       });
       return;
     }
@@ -146,7 +138,6 @@ export class GoogleDriveFileBrowser extends Widget {
     });
   }
 
-  private _isDisposed = false;
   private _browser: FileBrowser;
   private _loginScreen: GoogleDriveLogin;
   private _logoutButton: ToolbarButton;
@@ -187,7 +178,7 @@ export class GoogleDriveLogin extends Widget {
     // a popup dialog. If the user is logged into the browser with
     // a Google account, this will likely succeed. Otherwise, they
     // will need to login explicitly.
-    settingsPromise.then(async settings => {
+    settingsPromise.then(async (settings) => {
       this._clientId = settings.get('clientId').composite as string;
       if (!this._clientId) {
         console.warn(
@@ -209,7 +200,7 @@ export class GoogleDriveLogin extends Widget {
         showDialog({
           title: 'Google API Error',
           body: err,
-          buttons: [Dialog.okButton({ label: 'OK' })]
+          buttons: [Dialog.okButton({ label: 'OK' })],
         });
       }
     });

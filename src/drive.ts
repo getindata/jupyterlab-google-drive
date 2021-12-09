@@ -16,7 +16,7 @@ import {
   driveApiRequest,
   gapiAuthorized,
   gapiInitialized,
-  makeError
+  makeError,
 } from './gapi';
 
 /**
@@ -100,7 +100,7 @@ type PaginatedResponse =
 /**
  * Alias for directory IFileType.
  */
-const directoryFileType = DocumentRegistry.defaultDirectoryFileType;
+const directoryFileType = DocumentRegistry.getDefaultDirectoryFileType();
 
 /**
  * The name of the dummy "Shared with me" folder.
@@ -117,7 +117,7 @@ const COLLECTIONS_DIRECTORY = '';
  */
 const SHARED_DIRECTORY_RESOURCE: FileResource = {
   kind: 'dummy',
-  name: SHARED_DIRECTORY
+  name: SHARED_DIRECTORY,
 };
 
 /**
@@ -125,7 +125,7 @@ const SHARED_DIRECTORY_RESOURCE: FileResource = {
  */
 const COLLECTIONS_DIRECTORY_RESOURCE: FileResource = {
   kind: 'dummy',
-  name: ''
+  name: '',
 };
 
 /* ****** Functions for uploading/downloading files ******** */
@@ -244,13 +244,13 @@ export async function uploadFile(
       params: {
         uploadType: 'multipart',
         supportsTeamDrives: !!resource.teamDriveId,
-        fields: RESOURCE_FIELDS
+        fields: RESOURCE_FIELDS,
       },
       headers: {
         'Content-Type':
-          'multipart/related; boundary="' + MULTIPART_BOUNDARY + '"'
+          'multipart/related; boundary="' + MULTIPART_BOUNDARY + '"',
       },
-      body: body
+      body: body,
     });
   };
 
@@ -316,7 +316,7 @@ export async function contentsModelFromFileResource(
       last_modified: resource.modifiedTime || '',
       mimetype: fileType.mimeTypes[0],
       content: null,
-      format: 'json'
+      format: 'json',
     };
 
     // Get directory listing if applicable.
@@ -363,7 +363,7 @@ export async function contentsModelFromFileResource(
       last_modified: resource.modifiedTime || '',
       mimetype: fileType.mimeTypes[0],
       content: null,
-      format: fileType.fileFormat
+      format: fileType.fileFormat,
     };
     // Download the contents from the server if necessary.
     if (includeContents) {
@@ -415,7 +415,7 @@ async function contentsModelFromDummyFileResource(
     last_modified: '',
     content: null,
     mimetype: '',
-    format: 'json'
+    format: 'json',
   };
   if (includeContents && !fileTypeForPath) {
     throw Error(
@@ -461,7 +461,7 @@ async function contentsModelFromDummyFileResource(
       undefined
     );
     const rootContentsPromise = resourceFromFileId('root').then(
-      rootResource => {
+      (rootResource) => {
         return contentsModelFromFileResource(
           rootResource,
           rootResource.name || '',
@@ -471,7 +471,7 @@ async function contentsModelFromDummyFileResource(
         );
       }
     );
-    const teamDrivesContentsPromise = listTeamDrives().then(drives => {
+    const teamDrivesContentsPromise = listTeamDrives().then((drives) => {
       const drivePromises: Promise<Contents.IModel>[] = [];
       for (let drive of drives) {
         drivePromises.push(
@@ -490,7 +490,7 @@ async function contentsModelFromDummyFileResource(
     const c = await Promise.all([
       rootContentsPromise,
       sharedContentsPromise,
-      teamDrivesContentsPromise
+      teamDrivesContentsPromise,
     ]);
     const rootItems = c[2];
     rootItems.unshift(c[1]);
@@ -562,14 +562,14 @@ export async function createPermissions(
       const permissionRequest = {
         type: 'user',
         role: 'writer',
-        emailAddress: address
+        emailAddress: address,
       };
       const request = gapi.client.drive.permissions.create({
         fileId: resource.id!,
         emailMessage: `${resource.name} has been shared with you`,
         sendNotificationEmail: true,
         resource: permissionRequest,
-        supportsTeamDrives: !!resource.teamDriveId
+        supportsTeamDrives: !!resource.teamDriveId,
       });
       batch.add(request);
     }
@@ -592,7 +592,7 @@ export async function deleteFile(path: string): Promise<void> {
   const createRequest = () => {
     return gapi.client.drive.files.delete({
       fileId: resource.id!,
-      supportsTeamDrives: !!resource.teamDriveId
+      supportsTeamDrives: !!resource.teamDriveId,
     });
   };
   await driveApiRequest<void>(createRequest, 204);
@@ -634,9 +634,7 @@ export async function searchDirectory(
   }
 
   const getPage = (pageToken?: string) => {
-    let createRequest: () => gapi.client.HttpRequest<
-      gapi.client.drive.FileList
-    >;
+    let createRequest: () => gapi.client.HttpRequest<gapi.client.drive.FileList>;
     if (resource.teamDriveId) {
       // Case of a directory in a team drive.
       createRequest = () => {
@@ -648,7 +646,7 @@ export async function searchDirectory(
           corpora: 'teamDrive',
           includeTeamDriveItems: true,
           supportsTeamDrives: true,
-          teamDriveId: resource.teamDriveId
+          teamDriveId: resource.teamDriveId,
         });
       };
     } else if (resource.kind === 'drive#teamDrive') {
@@ -662,7 +660,7 @@ export async function searchDirectory(
           corpora: 'teamDrive',
           includeTeamDriveItems: true,
           supportsTeamDrives: true,
-          teamDriveId: resource.id!
+          teamDriveId: resource.id!,
         });
       };
     } else {
@@ -672,7 +670,7 @@ export async function searchDirectory(
           q: fullQuery,
           pageSize: FILE_PAGE_SIZE,
           pageToken,
-          fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`
+          fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`,
         });
       };
     }
@@ -711,7 +709,7 @@ export async function searchSharedFiles(
         q: fullQuery,
         pageSize: FILE_PAGE_SIZE,
         pageToken,
-        fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`
+        fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`,
       });
     };
     return driveApiRequest(createRequest);
@@ -769,7 +767,7 @@ export async function moveFile(
     const values = await Promise.all([
       resourcePromise,
       newFolderPromise,
-      directorySearchPromise
+      directorySearchPromise,
     ]);
     const resource = values[0];
     const newFolder = values[1];
@@ -787,10 +785,10 @@ export async function moveFile(
           addParents: newFolder.id!,
           removeParents: resource.parents ? resource.parents[0] : undefined,
           resource: {
-            name: newName
+            name: newName,
           },
           fields: RESOURCE_FIELDS,
-          supportsTeamDrives: !!(resource.teamDriveId || newFolder.teamDriveId)
+          supportsTeamDrives: !!(resource.teamDriveId || newFolder.teamDriveId),
         });
       };
       const response = await driveApiRequest<FileResource>(createRequest);
@@ -858,7 +856,7 @@ export async function copyFile(
     const values = await Promise.all([
       resourcePromise,
       newFolderPromise,
-      directorySearchPromise
+      directorySearchPromise,
     ]);
     const resource = values[0];
     const newFolder = values[1];
@@ -875,10 +873,10 @@ export async function copyFile(
           fileId: resource.id!,
           resource: {
             parents: [newFolder.id!],
-            name: newName
+            name: newName,
           },
           fields: RESOURCE_FIELDS,
-          supportsTeamDrives: !!(newFolder.teamDriveId || resource.teamDriveId)
+          supportsTeamDrives: !!(newFolder.teamDriveId || resource.teamDriveId),
         });
       };
       const response = await driveApiRequest<FileResource>(createRequest);
@@ -924,7 +922,7 @@ export async function listRevisions(
         fileId: resource.id!,
         pageSize: REVISION_PAGE_SIZE,
         pageToken,
-        fields: `${REVISION_LIST_FIELDS}, revisions(${REVISION_FIELDS})`
+        fields: `${REVISION_LIST_FIELDS}, revisions(${REVISION_FIELDS})`,
       });
     };
     return driveApiRequest<gapi.client.drive.RevisionList>(createRequest);
@@ -959,8 +957,8 @@ export async function pinCurrentRevision(
       fileId: resource.id!,
       revisionId: resource.headRevisionId!,
       resource: {
-        keepForever: true
-      }
+        keepForever: true,
+      },
     });
   };
   const revision = await driveApiRequest<RevisionResource>(createRequest);
@@ -987,8 +985,8 @@ export async function unpinRevision(
       fileId: resource.id!,
       revisionId: revisionId,
       resource: {
-        keepForever: false
-      }
+        keepForever: false,
+      },
     });
   };
   await driveApiRequest<RevisionResource>(createRequest);
@@ -1028,7 +1026,7 @@ export async function revertToRevision(
     last_modified: String(revisionResource.modifiedTime),
     mimetype: fileType.mimeTypes[0],
     content,
-    format: fileType.fileFormat
+    format: fileType.fileFormat,
   };
 
   // Reupload the reverted file to the head revision.
@@ -1072,7 +1070,7 @@ function fileResourceFromContentsModel(
   }
   return {
     name: contents.name || PathExt.basename(contents.path || ''),
-    mimeType
+    mimeType,
   };
 }
 
@@ -1113,7 +1111,7 @@ async function getResourceForRelativePath(
         supportsTeamDrives: true,
         includeTeamDriveItems: true,
         corpora: 'teamDrive',
-        teamDriveId: teamDriveId
+        teamDriveId: teamDriveId,
       });
     };
   } else {
@@ -1121,7 +1119,7 @@ async function getResourceForRelativePath(
       return gapi.client.drive.files.list({
         q: query,
         pageSize: FILE_PAGE_SIZE,
-        fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`
+        fields: `${FILE_LIST_FIELDS}, files(${RESOURCE_FIELDS})`,
       });
     };
   }
@@ -1157,7 +1155,7 @@ async function resourceFromFileId(id: string): Promise<FileResource> {
   const createRequest = () => {
     return gapi.client.drive.files.get({
       fileId: id,
-      fields: RESOURCE_FIELDS
+      fields: RESOURCE_FIELDS,
     });
   };
   return driveApiRequest<FileResource>(createRequest);
@@ -1202,7 +1200,7 @@ async function listTeamDrives(): Promise<TeamDriveResource[]> {
       return gapi.client.drive.teamdrives.list({
         fields: `${TEAMDRIVE_LIST_FIELDS}, teamDrives(${TEAMDRIVE_FIELDS})`,
         pageSize: TEAMDRIVE_PAGE_SIZE,
-        pageToken
+        pageToken,
       });
     };
     return driveApiRequest<gapi.client.drive.TeamDriveList>(createRequest);
@@ -1246,10 +1244,10 @@ async function depaginate<
   pageToken?: string
 ): Promise<T[]> {
   const list = await getPage(pageToken);
-  const total = (list[listName] as any) as T[];
+  const total = list[listName] as any as T[];
   if (list.nextPageToken) {
     return depaginate<T, L>(getPage, listName, list.nextPageToken).then(
-      next => {
+      (next) => {
         return [...total, ...next];
       }
     );
@@ -1369,8 +1367,8 @@ async function downloadResource(
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.text();
     return format === 'text' ? data : JSON.parse(data);
@@ -1379,10 +1377,10 @@ async function downloadResource(
       return gapi.client.drive.files.get({
         fileId: resource.id!,
         alt: 'media',
-        supportsTeamDrives: !!resource.teamDriveId
+        supportsTeamDrives: !!resource.teamDriveId,
       });
     };
-    return driveApiRequest<any>(createRequest).then(result => {
+    return driveApiRequest<any>(createRequest).then((result) => {
       return btoa(result);
     });
   }
@@ -1408,14 +1406,12 @@ async function downloadRevision(
 
   if (format !== 'base64') {
     const token = gapi.auth.getToken().access_token;
-    const url = `https://www.googleapis.com/drive/v3/files/${
-      resource.id
-    }/revisions/${revisionId}?alt=media`;
+    const url = `https://www.googleapis.com/drive/v3/files/${resource.id}/revisions/${revisionId}?alt=media`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await response.text();
     return format === 'text' ? data : JSON.parse(data);
@@ -1424,10 +1420,10 @@ async function downloadRevision(
       return gapi.client.drive.revisions.get({
         fileId: resource.id!,
         revisionId: revisionId,
-        alt: 'media'
+        alt: 'media',
       });
     };
-    return driveApiRequest<any>(createRequest).then(result => {
+    return driveApiRequest<any>(createRequest).then((result) => {
       return btoa(result);
     });
   }
